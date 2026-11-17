@@ -11,6 +11,7 @@ import { bookingsRouter } from './routes/bookings.routes';
 import { employeesRouter } from './routes/employees.routes';
 import { menuRouter } from './routes/menu.routes';
 import { ordersRouter } from './routes/orders.routes';
+import { suppliesRouter } from './routes/supplies.routes';
 import { tablesRouter } from './routes/tables.routes';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/auth', authRouter);
 app.use('/api', menuRouter);
 app.use('/api', tablesRouter);
 app.use('/api', employeesRouter);
+app.use('/api', suppliesRouter);
 app.use('/api', ordersRouter);
 app.use('/api', bookingsRouter);
 

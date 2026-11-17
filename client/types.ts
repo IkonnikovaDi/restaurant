@@ -79,6 +79,16 @@ export interface Booking {
   createdAt?: string;
 }
 
+export interface Supply {
+  supplyId: number;
+  supplyDate: string;
+  supplier: string;
+  invoiceNumber: string;
+  amount: number;
+  employeeId: number;
+  employeeName: string;
+}
+
 export interface CartLine {
   dish: Dish;
   quantity: number;

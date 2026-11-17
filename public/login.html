@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — ресторан «Ирис»</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="login-page">
+  <main class="login-layout">
+    <section class="login-hero">
+      <div class="brand brand-large">
+        <span class="brand-mark">И</span>
+        <span class="brand-text"><strong>Ирис</strong><small>японский ресторан</small></span>
+      </div>
+
+      <h1>Вкус Японии<br>в центре Омска</h1>
+      <p class="login-lead">
+        Свежие роллы, суши, горячие блюда и атмосфера, в которую хочется возвращаться.
+      </p>
+
+      <ul class="login-features">
+        <li>Актуальное меню и цены</li>
+        <li>Бронирование столов онлайн</li>
+        <li>Оформление заказов для персонала</li>
+      </ul>
+
+      <div class="login-art" aria-hidden="true">
+        <span>🍣</span>
+        <span>🍜</span>
+        <span>🍵</span>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-card">
+        <span class="eyebrow">Добро пожаловать</span>
+        <h2>Вход в систему</h2>
+        <p class="muted">Выберите демо-роль или введите свои данные.</p>
+
+        <div class="demo-roles">
+          <button type="button" class="demo-role" data-demo-login="admin" data-demo-password="admin123">
+            <span class="demo-icon">🛡️</span>
+            <span><strong>Администратор</strong><small>полный доступ</small></span>
+          </button>
+          <button type="button" class="demo-role" data-demo-login="guest" data-demo-password="guest123">
+            <span class="demo-icon">🍣</span>
+            <span><strong>Гость</strong><small>меню и бронирование</small></span>
+          </button>
+        </div>
+
+        <div class="divider"><span>или</span></div>
+
+        <form id="login-form" class="form" novalidate>
+          <label class="field">
+            <span>Логин</span>
+            <input id="login-input" name="login" type="text" autocomplete="username" placeholder="admin" required>
+          </label>
+          <label class="field">
+            <span>Пароль</span>
+            <input id="password-input" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          </label>
+
+          <div id="login-error" class="form-error" hidden></div>
+
+          <button id="login-submit" class="btn btn-primary btn-block" type="submit">Войти</button>
+        </form>
+
+        <p class="demo-hint">Демо-доступ: <strong>admin / admin123</strong> или <strong>guest / guest123</strong></p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/login.js"></script>
+</body>
+</html>

@@ -85,5 +85,12 @@ main()
       'Ошибка инициализации БД:',
       error instanceof Error ? error.message : error
     );
+
+    if ((error as { code?: string }).code === '28P01') {
+      console.error(
+        'PostgreSQL отклонил пароль. Укажите правильный DB_PASSWORD в файле .env и повторите npm run db:init.'
+      );
+    }
+
     process.exit(1);
   });

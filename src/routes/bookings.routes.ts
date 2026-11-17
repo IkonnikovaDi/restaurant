@@ -34,14 +34,6 @@ interface BookingRow {
   table_id: number;
 }
 
-function todayDateOnly(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 bookingsRouter.post(
   '/bookings',
   asyncHandler(async (req, res) => {
@@ -104,9 +96,10 @@ bookingsRouter.post(
         throw new ApiError(409, 'Этот стол уже забронирован на выбранное время');
       }
 
+      // Новая бронь создаётся в статусе «новая»: администратор подтверждает или отменяет её в панели.
       const insertResult = await client.query(
         `INSERT INTO bookings (customer_name, phone, booking_time, guests_count, table_id, status)
-         VALUES ($1, $2, $3, $4, $5, 'подтверждена')
+         VALUES ($1, $2, $3, $4, $5, 'новая')
          RETURNING booking_id AS "bookingId",
                    customer_name AS "customerName",
                    phone,
@@ -138,9 +131,10 @@ bookingsRouter.get(
   '/bookings',
   requireRole('admin'),
   asyncHandler(async (req, res) => {
-    let date = todayDateOnly();
+    // Без параметра date администратор видит все брони, с параметром — только за выбранный день.
+    let date: string | null = null;
 
-    if (req.query.date !== undefined) {
+    if (req.query.date !== undefined && req.query.date !== '') {
       const parsed = asDateOnly(req.query.date);
       if (parsed === null) {
         throw new ApiError(400, 'Дата должна быть в формате ГГГГ-ММ-ДД');
@@ -160,8 +154,9 @@ bookingsRouter.get(
               b.created_at AS "createdAt"
        FROM bookings b
        JOIN restaurant_tables t ON t.table_id = b.table_id
-       WHERE b.booking_time::date = $1::date
-       ORDER BY b.booking_time`,
+       WHERE ($1::date IS NULL OR b.booking_time::date = $1::date)
+       ORDER BY b.booking_time DESC
+       LIMIT 200`,
       [date]
     );
 

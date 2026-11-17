@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Меню — ресторан «Ирис»</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="app-page">
+  <div id="app-header"></div>
+
+  <main class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">Ресторан «Ирис»</span>
+        <h1>Меню японской кухни</h1>
+        <p>
+          Свежие суши и роллы, горячие блюда, ароматные супы и десерты.
+          Выберите любимые позиции и забронируйте стол за пару минут.
+        </p>
+        <div class="hero-actions">
+          <button id="open-booking" type="button" class="btn btn-primary">Забронировать стол</button>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="hero-emoji">🍣</span>
+        <span class="hero-ring"></span>
+        <span class="hero-note">Ирис · 2026</span>
+      </div>
+    </section>
+
+    <section class="menu-toolbar">
+      <div id="category-chips" class="chips"></div>
+      <label class="search-field">
+        <span aria-hidden="true">🔍</span>
+        <input id="menu-search" type="search" placeholder="Найти блюдо..." autocomplete="off">
+      </label>
+    </section>
+
+    <div id="menu-sections" class="menu-sections"></div>
+  </main>
+
+  <footer class="site-footer">
+    <span>Ресторан «Ирис» · японская кухня</span>
+    <span>Омск, 2026</span>
+  </footer>
+
+  <dialog id="booking-dialog" class="modal">
+    <form id="booking-form" class="modal-card" novalidate>
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">Бронирование</span>
+          <h2>Забронировать стол</h2>
+        </div>
+        <button type="button" class="icon-btn" data-close-dialog aria-label="Закрыть">×</button>
+      </div>
+
+      <p class="muted">Укажите контакты, дату и количество гостей — покажем свободные столы.</p>
+
+      <div class="form-grid">
+        <label class="field">
+          <span>ФИО</span>
+          <input id="booking-name" type="text" maxlength="150" placeholder="Иванов Иван Иванович" required>
+        </label>
+        <label class="field">
+          <span>Телефон</span>
+          <input id="booking-phone" type="tel" maxlength="20" placeholder="+7 (999) 123-45-67" required>
+        </label>
+        <label class="field">
+          <span>Дата и время</span>
+          <input id="booking-datetime" type="datetime-local" required>
+        </label>
+        <label class="field">
+          <span>Гостей</span>
+          <input id="booking-guests" type="number" min="1" max="20" value="2" required>
+        </label>
+        <label class="field field-wide">
+          <span>Стол</span>
+          <select id="booking-table" required>
+            <option value="">Сначала укажите дату и количество гостей</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="booking-error" class="form-error" hidden></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-dialog>Отмена</button>
+        <button id="booking-submit" type="submit" class="btn btn-primary">Забронировать</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/js/menu.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель управления — ресторан «Ирис»</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="app-page">
+  <div id="app-header"></div>
+
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <span class="eyebrow">Администратор</span>
+        <h1>Панель управления</h1>
+        <p class="muted">Заказы, брони, сотрудники, столы, поставки и блюда ресторана.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Разделы панели">
+        <button type="button" class="tab is-active" data-tab="new" role="tab">Новый заказ</button>
+        <button type="button" class="tab" data-tab="orders" role="tab">Заказы</button>
+        <button type="button" class="tab" data-tab="bookings" role="tab">Брони</button>
+        <button type="button" class="tab" data-tab="employees" role="tab">Сотрудники</button>
+        <button type="button" class="tab" data-tab="tables" role="tab">Столы</button>
+        <button type="button" class="tab" data-tab="supplies" role="tab">Поставки</button>
+        <button type="button" class="tab" data-tab="dishes" role="tab">Блюда</button>
+      </div>
+    </section>
+
+    <section class="tab-panel is-active" data-panel="new">
+      <div class="order-layout">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Меню</h2>
+            <input id="catalog-search" class="input" type="search" placeholder="Поиск блюда..." autocomplete="off">
+          </div>
+          <div id="catalog" class="catalog"></div>
+        </div>
+
+        <aside class="panel cart-panel">
+          <div class="panel-head">
+            <h2>Заказ</h2>
+            <button id="clear-cart" type="button" class="btn btn-ghost btn-small">Очистить</button>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Стол</span>
+              <select id="order-table" required>
+                <option value="">Загружаем столы...</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Официант</span>
+              <select id="order-waiter" required>
+                <option value="">Загружаем официантов...</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="cart-items" class="cart-items"></div>
+
+          <div class="cart-total">
+            <span>Итого</span>
+            <strong id="cart-total">0 ₽</strong>
+          </div>
+
+          <div id="order-error" class="form-error" hidden></div>
+
+          <button id="submit-order" type="button" class="btn btn-primary btn-block">Создать заказ</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="orders">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Заказы</h2>
+          <div class="toolbar">
+            <select id="orders-status-filter" class="input">
+              <option value="">Все статусы</option>
+              <option value="новый">Новый</option>
+              <option value="готовится">Готовится</option>
+              <option value="подан">Подан</option>
+              <option value="оплачен">Оплачен</option>
+              <option value="закрыт">Закрыт</option>
+              <option value="отменён">Отменён</option>
+            </select>
+            <button id="refresh-orders" type="button" class="btn btn-ghost btn-small">Обновить</button>
+          </div>
+        </div>
+        <div id="orders-list" class="stack"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="bookings">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Брони</h2>
+          <div class="toolbar">
+            <input id="bookings-date" class="input" type="date" aria-label="Дата брони">
+            <button id="refresh-bookings" type="button" class="btn btn-ghost btn-small">Обновить</button>
+          </div>
+        </div>
+        <p class="muted panel-hint">Без выбранной даты показываются все брони. Укажите дату, чтобы отфильтровать по дню.</p>
+        <div id="bookings-list" class="stack"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="employees">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Сотрудники</h2>
+          <button id="refresh-employees" type="button" class="btn btn-ghost btn-small">Обновить</button>
+        </div>
+        <div id="employees-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="tables">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Столы</h2>
+          <button id="refresh-tables" type="button" class="btn btn-ghost btn-small">Обновить</button>
+        </div>
+        <div id="tables-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="supplies">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Поставки</h2>
+          <button id="refresh-supplies" type="button" class="btn btn-ghost btn-small">Обновить</button>
+        </div>
+        <div id="supplies-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="dishes">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Блюда</h2>
+          <button id="refresh-dishes" type="button" class="btn btn-ghost btn-small">Обновить</button>
+        </div>
+        <div id="dishes-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/order.js"></script>
+</body>
+</html>
