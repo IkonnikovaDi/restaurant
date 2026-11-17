@@ -75,6 +75,7 @@ export interface Booking {
   guestsCount: number;
   tableId: number;
   tableNumber?: number;
+  userId?: number | null;
   status: string;
   createdAt?: string;
 }

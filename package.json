@@ -11,7 +11,9 @@
     "build": "npm run build:server && npm run build:client",
     "start": "node dist/server.js",
     "db:init": "ts-node src/scripts/init-db.ts",
-    "db:seed": "ts-node src/scripts/seed-db.ts"
+    "db:seed": "ts-node src/scripts/seed-db.ts",
+    "db:triggers": "ts-node src/scripts/apply-triggers.ts",
+    "db:migrate": "ts-node src/scripts/migrate.ts"
   },
   "keywords": [
     "restaurant",

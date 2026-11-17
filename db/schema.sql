@@ -157,6 +157,9 @@ CREATE TABLE bookings (
     booking_time  TIMESTAMPTZ NOT NULL,
     guests_count  INTEGER NOT NULL CHECK (guests_count > 0),
     table_id      INTEGER NOT NULL,
+    -- Гостевая учётная запись, создавшая бронь. NULL для броней, оформленных
+    -- администратором или до появления личного кабинета гостя.
+    user_id       INTEGER,
     status        VARCHAR(20) NOT NULL DEFAULT 'подтверждена',
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_bookings_table
@@ -189,6 +192,13 @@ CREATE TABLE users (
 
 COMMENT ON TABLE users IS 'Учётные записи для входа в веб-приложение';
 
+-- Внешний ключ брони на пользователя добавляется отдельно: таблица users
+-- создаётся после bookings, поэтому ссылку нельзя объявить внутри CREATE TABLE.
+ALTER TABLE bookings
+    ADD CONSTRAINT fk_bookings_user
+        FOREIGN KEY (user_id) REFERENCES users (user_id)
+        ON UPDATE CASCADE ON DELETE SET NULL;
+
 -- ---------------------------------------------------------------------------
 -- Индексы для типовых запросов
 -- ---------------------------------------------------------------------------
@@ -199,6 +209,7 @@ CREATE INDEX idx_orders_created_at ON orders (created_at);
 CREATE INDEX idx_order_items_order ON order_items (order_id);
 CREATE INDEX idx_bookings_table_time ON bookings (table_id, booking_time);
 CREATE INDEX idx_bookings_time ON bookings (booking_time);
+CREATE INDEX idx_bookings_user ON bookings (user_id);
 CREATE INDEX idx_supplies_date ON supplies (supply_date);
 
 -- Активная бронь на конкретное время должна быть уникальной.

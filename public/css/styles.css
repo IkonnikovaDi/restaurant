@@ -1317,6 +1317,21 @@ textarea {
   gap: 8px;
 }
 
+.booking-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.my-bookings-panel .panel-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.my-bookings-panel .booking-card {
+  border-left: 4px solid var(--plum);
+}
+
 /* --------------------------------------------------------------------------
    Статусы и уведомления
    -------------------------------------------------------------------------- */

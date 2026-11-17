@@ -60,6 +60,7 @@ npm run db:init
 3. Если базы нет — создаёт её командой `CREATE DATABASE`.
 4. Применяет [`db/schema.sql`](db/schema.sql).
 5. Загружает тестовые данные из [`db/seed.sql`](db/seed.sql).
+6. Создаёт функции и триггеры из [`db/triggers.sql`](db/triggers.sql).
 
 **Создавать базу через `createdb` вручную не нужно.** Это делает `npm run db:init`. Если база уже существует, скрипт не удалит её, а пересоздаст таблицы и заново загрузит тестовые данные.
 
@@ -162,14 +163,15 @@ npm start
 restaurant/
 ├── db/
 │   ├── schema.sql          # таблицы, PK, FK, CHECK, индексы
-│   └── seed.sql            # тестовые данные и пользователи
+│   ├── seed.sql            # тестовые данные и пользователи
+│   └── triggers.sql        # функции и триггеры (сумма заказа, статусы столов)
 ├── src/
 │   ├── server.ts           # Express, сессии, статика
 │   ├── config/db.ts        # пул PostgreSQL и транзакции
 │   ├── middleware/         # авторизация и обработка ошибок
 │   ├── routes/             # auth, menu, tables, employees, orders, bookings, supplies
 │   ├── services/           # пересчёт статуса стола
-│   ├── scripts/            # init-db, seed-db
+│   ├── scripts/            # init-db, seed-db, apply-triggers
 │   ├── types/              # типы и расширение сессии
 │   └── utils/              # валидация входных данных
 ├── client/
@@ -200,8 +202,9 @@ restaurant/
 | `npm run build:client` | Компиляция клиента в `public/js` |
 | `npm run build` | Полная сборка |
 | `npm start` | Запуск собранного сервера |
-| `npm run db:init` | Создание БД, схемы и тестовых данных |
+| `npm run db:init` | Создание БД, схемы, тестовых данных и триггеров |
 | `npm run db:seed` | Повторная загрузка только тестовых данных |
+| `npm run db:triggers` | Применение только [`db/triggers.sql`](db/triggers.sql) |
 
 ## Схема базы данных
 
@@ -237,6 +240,48 @@ restaurant/
 - частичный уникальный индекс, запрещающий две активные брони одного стола на одно время;
 - `ON DELETE CASCADE` для состава заказа и `ON DELETE RESTRICT` для блюд, сотрудников и столов.
 
+## Триггеры базы данных
+
+Файл [`db/triggers.sql`](db/triggers.sql) содержит функции и триггеры, которые переносят часть бизнес-логики на сторону PostgreSQL:
+
+| Триггер | Таблица | Событие | Действие |
+|---|---|---|---|
+| `trg_order_items_recalc_total` | `order_items` | `INSERT`, `UPDATE`, `DELETE` | пересчитывает `orders.total` как `SUM(quantity * unit_price)` по позициям заказа |
+| `trg_orders_sync_table_status` | `orders` | `UPDATE OF status` | при переходе в «оплачен» или «закрыт» пересчитывает статус стола |
+| `trg_bookings_sync_table_status` | `bookings` | `INSERT`, `UPDATE OF status, table_id` | бронь на сегодня переводит стол в «забронирован», отмена или выполнение — освобождает |
+
+Статус стола вычисляет функция `refresh_table_status()` по приоритету: активный заказ (`новый`, `готовится`, `подан`) → «занят»; активная бронь на сегодня → «забронирован»; иначе → «свободен». Поэтому стол не освобождается, пока на нём есть незакрытый заказ, и не сбрасывается бронь на текущий день.
+
+Сумма заказа пересчитывается как `SUM`, а не приращением `total = total + quantity * unit_price`. Для обычной вставки результат тот же, но пересчёт не удваивает сумму, если заказ уже создан с рассчитанным `total` (так делает сервер), и корректно обрабатывает изменение количества и удаление позиций.
+
+Применение:
+
+```bash
+# через psql
+psql -U postgres -d iris_restaurant -f db/triggers.sql
+
+# через код (Node.js + pg)
+npm run db:triggers
+
+# вместе со схемой и тестовыми данными
+npm run db:init
+```
+
+Скрипт идемпотентен: триггеры пересоздаются, функции обновляются, повторный запуск безопасен. [`db/schema.sql`](db/schema.sql) пересоздаёт таблицы, поэтому после его повторного применения триггеры нужно применить заново.
+
+Проверка:
+
+```sql
+-- сумма заказа пересчитывается автоматически
+INSERT INTO order_items (order_id, dish_id, quantity, unit_price)
+VALUES (1, 4, 2, 520.00);
+SELECT total FROM orders WHERE order_id = 1;
+
+-- после оплаты стол освобождается
+UPDATE orders SET status = 'оплачен' WHERE order_id = 1;
+SELECT status FROM restaurant_tables WHERE table_id = 1;
+```
+
 ## Ручная инициализация БД
 
 Если автоматический скрипт недоступен, можно использовать `psql`:
@@ -245,6 +290,7 @@ restaurant/
 createdb -U postgres iris_restaurant
 psql -U postgres -d iris_restaurant -f db/schema.sql
 psql -U postgres -d iris_restaurant -f db/seed.sql
+psql -U postgres -d iris_restaurant -f db/triggers.sql
 ```
 
 Важно: [`db/schema.sql`](db/schema.sql) и [`db/seed.sql`](db/seed.sql) **не создают саму базу данных** — они работают внутри уже существующей БД `iris_restaurant`. Базу создаёт либо `npm run db:init`, либо команда `createdb`.

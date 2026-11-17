@@ -175,6 +175,10 @@ export function getBookings(date?: string): Promise<{ bookings: Booking[] }> {
   );
 }
 
+export function getMyBookings(): Promise<{ bookings: Booking[] }> {
+  return request<{ bookings: Booking[] }>('/bookings/my');
+}
+
 export function getSupplies(): Promise<{ supplies: Supply[] }> {
   return request<{ supplies: Supply[] }>('/supplies');
 }

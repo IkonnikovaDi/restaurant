@@ -56,6 +56,7 @@ const ordersList = byId<HTMLDivElement>('orders-list');
 
 const bookingsDate = byId<HTMLInputElement>('bookings-date');
 const refreshBookingsButton = byId<HTMLButtonElement>('refresh-bookings');
+const clearBookingsDateButton = byId<HTMLButtonElement>('clear-bookings-date');
 const bookingsList = byId<HTMLDivElement>('bookings-list');
 
 const employeesList = byId<HTMLDivElement>('employees-list');
@@ -71,6 +72,9 @@ let menu: Category[] = [];
 let tables: Table[] = [];
 let waiters: Employee[] = [];
 let catalogQuery = '';
+
+let activeTab = 'new';
+let bookingsRefreshTimer: number | undefined;
 
 const cart = new Map<number, CartLine>();
 
@@ -498,16 +502,23 @@ async function loadOrders(): Promise<void> {
   }
 }
 
-async function loadBookings(): Promise<void> {
+async function loadBookings(silent = false): Promise<void> {
   // Пустая дата означает «показать все брони».
   const date = bookingsDate.value || undefined;
-  bookingsList.innerHTML =
-    '<div class="empty-state compact"><p>Загружаем брони...</p></div>';
+
+  if (!silent) {
+    bookingsList.innerHTML =
+      '<div class="empty-state compact"><p>Загружаем брони...</p></div>';
+  }
 
   try {
     const response = await getBookings(date);
     renderBookings(response.bookings);
   } catch (error) {
+    if (silent) {
+      return;
+    }
+
     bookingsList.innerHTML = `
       <div class="empty-state compact">
         <p>${escapeHtml(
@@ -515,6 +526,23 @@ async function loadBookings(): Promise<void> {
         )}</p>
       </div>
     `;
+  }
+}
+
+const BOOKINGS_REFRESH_INTERVAL = 10_000;
+
+function startBookingsAutoRefresh(): void {
+  stopBookingsAutoRefresh();
+  bookingsRefreshTimer = window.setInterval(
+    () => void loadBookings(true),
+    BOOKINGS_REFRESH_INTERVAL
+  );
+}
+
+function stopBookingsAutoRefresh(): void {
+  if (bookingsRefreshTimer !== undefined) {
+    window.clearInterval(bookingsRefreshTimer);
+    bookingsRefreshTimer = undefined;
   }
 }
 
@@ -698,17 +726,19 @@ async function changeBookingStatus(
   try {
     await updateBookingStatus(bookingId, nextStatus);
     showToast(`Статус брони изменён на «${nextStatus}»`, 'success');
-    await Promise.all([loadBookings(), loadFreeTables()]);
+    await Promise.all([loadBookings(true), loadFreeTables()]);
   } catch (error) {
     showToast(
       error instanceof ApiRequestError ? error.message : 'Не удалось изменить статус брони',
       'error'
     );
-    await loadBookings();
+    await loadBookings(true);
   }
 }
 
 function switchTab(tab: string): void {
+  activeTab = tab;
+
   tabs.forEach((button) => {
     button.classList.toggle('is-active', button.dataset.tab === tab);
   });
@@ -721,7 +751,12 @@ function switchTab(tab: string): void {
     void loadOrders();
   }
   if (tab === 'bookings') {
+    // Бронь может создать гость в другом окне: держим список актуальным
+    // без ручного нажатия «Обновить».
     void loadBookings();
+    startBookingsAutoRefresh();
+  } else {
+    stopBookingsAutoRefresh();
   }
   if (tab === 'employees') {
     void loadEmployees();
@@ -880,6 +915,11 @@ function setupOrders(): void {
 function setupBookings(): void {
   refreshBookingsButton.addEventListener('click', () => void loadBookings());
   bookingsDate.addEventListener('change', () => void loadBookings());
+  clearBookingsDateButton.addEventListener('click', () => {
+    // Сброс фильтра: новая бронь на другую дату не должна теряться.
+    bookingsDate.value = '';
+    void loadBookings();
+  });
 
   bookingsList.addEventListener('click', (event) => {
     const button = closestButton(
@@ -935,6 +975,14 @@ async function init(): Promise<void> {
   setupOrders();
   setupBookings();
   setupReferenceSections();
+
+  // Возврат в окно панели тоже обновляет брони: гость мог создать новую,
+  // пока администратор работал в другом окне или вкладке.
+  window.addEventListener('focus', () => {
+    if (activeTab === 'bookings') {
+      void loadBookings(true);
+    }
+  });
 
   await Promise.all([loadMenu(), loadFreeTables(), loadWaiters()]);
   renderCart();

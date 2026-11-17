@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { pool, withTransaction } from '../config/db';
-import { requireRole } from '../middleware/auth';
+import { requireAuth, requireRole } from '../middleware/auth';
 import { ApiError, asyncHandler } from '../middleware/errors';
 import { refreshTableStatus } from '../services/tableStatus';
 import { BookingStatus } from '../types';
@@ -96,19 +96,25 @@ bookingsRouter.post(
         throw new ApiError(409, 'Этот стол уже забронирован на выбранное время');
       }
 
+      // Гостевая бронь привязывается к учётной записи, чтобы гость видел её
+      // в разделе «Мои брони» и после подтверждения администратором.
+      const sessionUser = req.session.user;
+      const userId = sessionUser?.role === 'guest' ? sessionUser.userId : null;
+
       // Новая бронь создаётся в статусе «новая»: администратор подтверждает или отменяет её в панели.
       const insertResult = await client.query(
-        `INSERT INTO bookings (customer_name, phone, booking_time, guests_count, table_id, status)
-         VALUES ($1, $2, $3, $4, $5, 'новая')
+        `INSERT INTO bookings (customer_name, phone, booking_time, guests_count, table_id, user_id, status)
+         VALUES ($1, $2, $3, $4, $5, $6, 'новая')
          RETURNING booking_id AS "bookingId",
                    customer_name AS "customerName",
                    phone,
                    booking_time AS "bookingTime",
                    guests_count AS "guestsCount",
                    table_id AS "tableId",
+                   user_id AS "userId",
                    status,
                    created_at AS "createdAt"`,
-        [customerName, phone, bookingTime.toISOString(), guestsCount, tableId]
+        [customerName, phone, bookingTime.toISOString(), guestsCount, tableId, userId]
       );
 
       await client.query(
@@ -124,6 +130,39 @@ bookingsRouter.post(
     });
 
     res.status(201).json({ booking });
+  })
+);
+
+// Брони текущего гостя. Маршрут объявлен до «/bookings», чтобы не пересекаться
+// с административным списком.
+bookingsRouter.get(
+  '/bookings/my',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+      throw new ApiError(401, 'Требуется авторизация');
+    }
+
+    const result = await pool.query(
+      `SELECT b.booking_id AS "bookingId",
+              b.customer_name AS "customerName",
+              b.phone,
+              b.booking_time AS "bookingTime",
+              b.guests_count AS "guestsCount",
+              b.table_id AS "tableId",
+              t.table_number AS "tableNumber",
+              b.status,
+              b.created_at AS "createdAt"
+       FROM bookings b
+       JOIN restaurant_tables t ON t.table_id = b.table_id
+       WHERE b.user_id = $1
+       ORDER BY b.booking_time DESC
+       LIMIT 100`,
+      [user.userId]
+    );
+
+    res.json({ bookings: result.rows });
   })
 );
 

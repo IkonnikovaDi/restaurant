@@ -130,6 +130,12 @@ INSERT INTO users (user_id, login, password_hash, role, full_name, employee_id) 
     (1, 'admin', crypt('admin123', gen_salt('bf')), 'admin', 'Администратор системы', 2),
     (2, 'guest', crypt('guest123', gen_salt('bf')), 'guest', 'Гость ресторана', NULL);
 
+-- Тестовые брони привязываем к демо-гостю, чтобы они сразу отображались
+-- в разделе «Мои брони» на странице меню.
+UPDATE bookings
+   SET user_id = (SELECT user_id FROM users WHERE login = 'guest')
+ WHERE user_id IS NULL;
+
 -- ---------------------------------------------------------------------------
 -- Синхронизация последовательностей с явно заданными идентификаторами
 -- ---------------------------------------------------------------------------

@@ -1,4 +1,10 @@
-import { ApiRequestError, createBooking, getFreeTables, getMenu } from './api.js';
+import {
+  ApiRequestError,
+  createBooking,
+  getFreeTables,
+  getMenu,
+  getMyBookings,
+} from './api.js';
 import {
   byId,
   categoryIcon,
@@ -10,8 +16,9 @@ import {
   initShell,
   showFormError,
   showToast,
+  statusClass,
 } from './common.js';
-import { Category, Dish } from './types.js';
+import { Booking, Category, Dish } from './types.js';
 
 const chipsContainer = byId<HTMLDivElement>('category-chips');
 const sectionsContainer = byId<HTMLDivElement>('menu-sections');
@@ -27,9 +34,15 @@ const bookingTable = byId<HTMLSelectElement>('booking-table');
 const bookingError = byId<HTMLDivElement>('booking-error');
 const bookingSubmit = byId<HTMLButtonElement>('booking-submit');
 
+const myBookingsList = byId<HTMLDivElement>('my-bookings');
+const refreshMyBookingsButton = byId<HTMLButtonElement>('refresh-my-bookings');
+
 let categories: Category[] = [];
 let activeCategoryId: number | null = null;
 let searchQuery = '';
+// Подпись последнего отрисованного списка броней: автообновление не трогает
+// DOM, если данные не изменились, и карточки не мигают.
+let myBookingsSignature = '';
 
 function dishMatches(dish: Dish, query: string): boolean {
   if (!query) {
@@ -166,6 +179,89 @@ async function loadMenu(): Promise<void> {
         <h3>Не удалось загрузить меню</h3>
         <p>${escapeHtml(
           error instanceof ApiRequestError ? error.message : 'Проверьте подключение к серверу.'
+        )}</p>
+      </div>
+    `;
+  }
+}
+
+function bookingStatusHint(status: string): string {
+  switch (status) {
+    case 'новая':
+      return 'Ожидает подтверждения администратором.';
+    case 'подтверждена':
+      return 'Бронь подтверждена — ждём вас в ресторане.';
+    case 'отменена':
+      return 'Бронь отменена.';
+    case 'выполнена':
+      return 'Бронь выполнена. Спасибо, что были с нами!';
+    default:
+      return '';
+  }
+}
+
+function renderMyBookings(bookings: Booking[]): void {
+  if (bookings.length === 0) {
+    myBookingsList.innerHTML = `
+      <div class="empty-state compact">
+        <span class="empty-icon">📅</span>
+        <p>У вас пока нет броней. Нажмите «Забронировать стол», чтобы выбрать дату и стол.</p>
+      </div>
+    `;
+    return;
+  }
+
+  myBookingsList.innerHTML = bookings
+    .map(
+      (booking) => `
+        <article class="booking-card">
+          <div class="booking-head">
+            <div class="booking-id">
+              <strong>Бронь №${booking.bookingId}</strong>
+              <span class="muted">${formatDateTime(booking.bookingTime)}</span>
+            </div>
+            <span class="status-badge ${statusClass(booking.status)}">${escapeHtml(
+              booking.status
+            )}</span>
+          </div>
+          <div class="booking-meta">
+            <span>Стол №${booking.tableNumber ?? booking.tableId}</span>
+            <span>Гостей: ${booking.guestsCount}</span>
+            <span>Телефон: ${escapeHtml(booking.phone)}</span>
+          </div>
+          <p class="booking-hint">${escapeHtml(bookingStatusHint(booking.status))}</p>
+        </article>
+      `
+    )
+    .join('');
+}
+
+async function loadMyBookings(silent = false): Promise<void> {
+  if (!silent) {
+    myBookingsList.innerHTML =
+      '<div class="empty-state compact"><p>Загружаем брони...</p></div>';
+  }
+
+  try {
+    const response = await getMyBookings();
+    const signature = JSON.stringify(response.bookings);
+
+    if (signature === myBookingsSignature) {
+      return;
+    }
+
+    myBookingsSignature = signature;
+    renderMyBookings(response.bookings);
+  } catch (error) {
+    if (silent) {
+      return;
+    }
+
+    myBookingsSignature = '';
+    myBookingsList.innerHTML = `
+      <div class="empty-state compact">
+        <p>${escapeHtml(
+          error instanceof ApiRequestError ? error.message : 'Не удалось загрузить брони'
         )}</p>
       </div>
     `;
@@ -314,6 +410,10 @@ async function submitBooking(): Promise<void> {
       )}`,
       'success'
     );
+
+    // Сразу показываем новую бронь в разделе «Мои брони».
+    myBookingsSignature = '';
+    await loadMyBookings(true);
   } catch (error) {
     showFormError(
       bookingError,
@@ -353,8 +453,14 @@ async function init(): Promise<void> {
 
   setupSearch();
   setupBookingDialog();
+  refreshMyBookingsButton.addEventListener('click', () => void loadMyBookings());
 
-  await loadMenu();
+  await Promise.all([loadMenu(), loadMyBookings()]);
+
+  // Статус брони меняет администратор — подтягиваем изменения без перезагрузки
+  // страницы, чтобы подтверждённая бронь появилась у гостя автоматически.
+  window.setInterval(() => void loadMyBookings(true), 15_000);
+  window.addEventListener('focus', () => void loadMyBookings(true));
 }
 
 void init();

@@ -61,6 +61,7 @@ async function main(): Promise<void> {
   try {
     const schemaPath = path.resolve(__dirname, '..', '..', 'db', 'schema.sql');
     const seedPath = path.resolve(__dirname, '..', '..', 'db', 'seed.sql');
+    const triggersPath = path.resolve(__dirname, '..', '..', 'db', 'triggers.sql');
 
     console.log('Применяю схему:', schemaPath);
     await client.query(await readFile(schemaPath, 'utf8'));
@@ -69,6 +70,10 @@ async function main(): Promise<void> {
     console.log('Загружаю тестовые данные:', seedPath);
     await client.query(await readFile(seedPath, 'utf8'));
     console.log('Тестовые данные загружены.');
+
+    console.log('Применяю триггеры:', triggersPath);
+    await client.query(await readFile(triggersPath, 'utf8'));
+    console.log('Триггеры применены.');
   } finally {
     await client.end();
   }

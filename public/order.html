@@ -100,10 +100,14 @@
           <h2>Брони</h2>
           <div class="toolbar">
             <input id="bookings-date" class="input" type="date" aria-label="Дата брони">
+            <button id="clear-bookings-date" type="button" class="btn btn-ghost btn-small">Все брони</button>
             <button id="refresh-bookings" type="button" class="btn btn-ghost btn-small">Обновить</button>
           </div>
         </div>
-        <p class="muted panel-hint">Без выбранной даты показываются все брони. Укажите дату, чтобы отфильтровать по дню.</p>
+        <p class="muted panel-hint">
+          Без выбранной даты показываются все брони. Укажите дату, чтобы отфильтровать по дню.
+          Список обновляется автоматически, новые брони гостей появляются без нажатия «Обновить».
+        </p>
         <div id="bookings-list" class="stack"></div>
       </div>
     </section>

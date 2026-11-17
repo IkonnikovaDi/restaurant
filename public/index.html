@@ -29,6 +29,21 @@
       </div>
     </section>
 
+    <section class="panel my-bookings-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Мои брони</h2>
+          <p class="muted panel-hint">
+            Здесь отображаются ваши брони и их актуальный статус — в том числе после подтверждения администратором.
+          </p>
+        </div>
+        <button id="refresh-my-bookings" type="button" class="btn btn-ghost btn-small">Обновить</button>
+      </div>
+      <div id="my-bookings" class="stack">
+        <div class="empty-state compact"><p>Загружаем брони...</p></div>
+      </div>
+    </section>
+
     <section class="menu-toolbar">
       <div id="category-chips" class="chips"></div>
       <label class="search-field">
