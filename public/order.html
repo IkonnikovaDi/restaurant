@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель управления — ресторан «Ирис»</title>
+  <title>Панель управления — ресторан «Лотос»</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body class="app-page">
@@ -25,6 +25,7 @@
         <button type="button" class="tab" data-tab="tables" role="tab">Столы</button>
         <button type="button" class="tab" data-tab="supplies" role="tab">Поставки</button>
         <button type="button" class="tab" data-tab="dishes" role="tab">Блюда</button>
+        <button type="button" class="tab" data-tab="analytics" role="tab">Аналитика</button>
       </div>
     </section>
 
@@ -99,7 +100,14 @@
         <div class="panel-head">
           <h2>Брони</h2>
           <div class="toolbar">
-            <input id="bookings-date" class="input" type="date" aria-label="Дата брони">
+            <input
+              id="bookings-date"
+              class="input"
+              type="text"
+              placeholder="дд.мм.гггг"
+              autocomplete="off"
+              aria-label="Дата брони"
+            >
             <button id="clear-bookings-date" type="button" class="btn btn-ghost btn-small">Все брони</button>
             <button id="refresh-bookings" type="button" class="btn btn-ghost btn-small">Обновить</button>
           </div>
@@ -149,6 +157,21 @@
           <button id="refresh-dishes" type="button" class="btn btn-ghost btn-small">Обновить</button>
         </div>
         <div id="dishes-list"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="analytics">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Аналитика</h2>
+            <p class="muted panel-hint">
+              10 готовых запросов к базе данных. Выберите параметры и нажмите
+              «Выполнить запрос» — результат появится в виде таблицы.
+            </p>
+          </div>
+        </div>
+        <div id="analytics-grid" class="analytics-grid"></div>
       </div>
     </section>
   </main>

@@ -1,6 +1,6 @@
-# Ресторан «Ирис» — веб-приложение
+# Ресторан «Лотос» — веб-приложение
 
-Полноценное учебное веб-приложение для ресторана японской кухни «Ирис»: меню, бронирование столов, оформление заказов и разграничение доступа по ролям.
+Полноценное учебное веб-приложение для ресторана японской кухни «Лотос»: меню, бронирование столов, оформление заказов и разграничение доступа по ролям.
 
 Предметная область и структура базы данных восстановлены по лабораторным работам из папки [`lab`](lab): категории, блюда, сотрудники, столы, заказы, состав заказа, поставки, бронирования.
 
@@ -122,7 +122,8 @@ npm start
 |---|---|
 | [`public/login.html`](public/login.html) | Вход, выбор демо-роли |
 | [`public/index.html`](public/index.html) | Меню для гостя: категории, поиск, карточки блюд, бронирование стола (администратор перенаправляется в панель управления) |
-| [`public/order.html`](public/order.html) | Панель управления: новый заказ, заказы, брони, сотрудники, столы, поставки, блюда |
+| [`public/order.html`](public/order.html) | Панель управления: новый заказ, заказы, брони, сотрудники, столы, поставки, блюда, аналитика |
+| [`public/admin.html`](public/admin.html) | Быстрый переход в панель управления на вкладку «Аналитика» |
 
 ## API
 
@@ -146,6 +147,16 @@ npm start
 | GET | `/api/bookings` | admin | Брони: все или на дату (параметр `date`) |
 | PATCH | `/api/bookings/:id/status` | admin | Смена статуса брони |
 | GET | `/api/supplies` | admin | Поставки: дата, поставщик, накладная, сумма |
+| GET | `/api/analytics/dishes?categoryId=1` | admin | Блюда заданной категории |
+| GET | `/api/analytics/dish-price?dishId=1` | admin | Стоимость конкретного блюда |
+| GET | `/api/analytics/bookings/today` | admin | Брони на текущий день |
+| GET | `/api/analytics/free-tables?datetime=...&guests=2` | все | Свободные столы на указанное время |
+| GET | `/api/analytics/waiter-orders?employeeId=3&date=2026-11-22` | admin | Заказы официанта за смену |
+| GET | `/api/analytics/top-dishes?month=2026-11` | admin | Топ-5 популярных блюд за месяц |
+| GET | `/api/analytics/orders?date=2026-11-22` | admin | История заказов за дату |
+| GET | `/api/analytics/supplies?supplier=...&from=...&to=...` | admin | Поставки поставщика за период |
+| GET | `/api/analytics/supply-amount?invoice=INV-2026-001` | admin | Сумма поставки по накладной |
+| GET | `/api/analytics/employees?position=официант` | admin | Сотрудники по должности |
 
 ### Жизненный цикл заказа
 
@@ -164,12 +175,13 @@ restaurant/
 ├── db/
 │   ├── schema.sql          # таблицы, PK, FK, CHECK, индексы
 │   ├── seed.sql            # тестовые данные и пользователи
-│   └── triggers.sql        # функции и триггеры (сумма заказа, статусы столов)
+│   ├── triggers.sql        # три триггера: сумма заказа, оплата, бронь
+│   └── analytics.sql       # 10 аналитических SQL-запросов
 ├── src/
 │   ├── server.ts           # Express, сессии, статика
 │   ├── config/db.ts        # пул PostgreSQL и транзакции
 │   ├── middleware/         # авторизация и обработка ошибок
-│   ├── routes/             # auth, menu, tables, employees, orders, bookings, supplies
+│   ├── routes/             # auth, menu, tables, employees, orders, bookings, supplies, analytics
 │   ├── services/           # пересчёт статуса стола
 │   ├── scripts/            # init-db, seed-db, apply-triggers
 │   ├── types/              # типы и расширение сессии
@@ -179,11 +191,13 @@ restaurant/
 │   ├── common.ts           # шапка, форматирование, toast
 │   ├── login.ts
 │   ├── menu.ts
-│   └── order.ts
+│   ├── order.ts
+│   └── analytics.ts        # вкладка «Аналитика» в панели управления
 ├── public/
 │   ├── login.html
 │   ├── index.html
 │   ├── order.html
+│   ├── admin.html          # переход в панель управления на вкладку аналитики
 │   ├── css/styles.css
 │   └── js/                 # скомпилированный клиентский TypeScript
 ├── package.json
@@ -242,17 +256,21 @@ restaurant/
 
 ## Триггеры базы данных
 
-Файл [`db/triggers.sql`](db/triggers.sql) содержит функции и триггеры, которые переносят часть бизнес-логики на сторону PostgreSQL:
+Файл [`db/triggers.sql`](db/triggers.sql) содержит только три триггера:
 
 | Триггер | Таблица | Событие | Действие |
 |---|---|---|---|
 | `trg_order_items_recalc_total` | `order_items` | `INSERT`, `UPDATE`, `DELETE` | пересчитывает `orders.total` как `SUM(quantity * unit_price)` по позициям заказа |
-| `trg_orders_sync_table_status` | `orders` | `UPDATE OF status` | при переходе в «оплачен» или «закрыт» пересчитывает статус стола |
-| `trg_bookings_sync_table_status` | `bookings` | `INSERT`, `UPDATE OF status, table_id` | бронь на сегодня переводит стол в «забронирован», отмена или выполнение — освобождает |
+| `trg_orders_release_table` | `orders` | `UPDATE OF status` | при переходе в «оплачен» или «закрыт» освобождает стол, если на нём нет активного заказа и брони на сегодня |
+| `trg_bookings_reserve_table` | `bookings` | `INSERT` | бронь на сегодня переводит свободный стол в «забронирован» |
 
-Статус стола вычисляет функция `refresh_table_status()` по приоритету: активный заказ (`новый`, `готовится`, `подан`) → «занят»; активная бронь на сегодня → «забронирован»; иначе → «свободен». Поэтому стол не освобождается, пока на нём есть незакрытый заказ, и не сбрасывается бронь на текущий день.
+Логика переноса брони на другой стол и изменения `table_id` удалена: в веб-приложении такая операция не используется. Отмена и выполнение брони обрабатываются на стороне API через [`src/services/tableStatus.ts`](src/services/tableStatus.ts).
 
 Сумма заказа пересчитывается как `SUM`, а не приращением `total = total + quantity * unit_price`. Для обычной вставки результат тот же, но пересчёт не удваивает сумму, если заказ уже создан с рассчитанным `total` (так делает сервер), и корректно обрабатывает изменение количества и удаление позиций.
+
+## Аналитика
+
+Файл [`db/analytics.sql`](db/analytics.sql) содержит 10 запросов из лабораторной работы. Они доступны через API `/api/analytics/...` и через вкладку «Аналитика» в панели управления. Для гостя запрос свободных столов доступен по публичному маршруту `/api/analytics/free-tables`; раздел бронирования на странице меню использует аналогичный расчёт через `/api/tables/free`.
 
 Применение:
 

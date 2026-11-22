@@ -1,21 +1,22 @@
 /* ==========================================================================
-   Ресторан «Ирис» — общая стилевая система
+   Ресторан «Лотос» — общая стилевая система
+   Светлая тёплая палитра с фиолетовыми акцентами
    ========================================================================== */
 
 :root {
-  --bg: #f7f3ee;
-  --surface: #ffffff;
-  --ink: #241a2e;
-  --muted: #7b6b85;
-  --plum: #4b2e5a;
-  --plum-dark: #2e1a3a;
-  --iris: #7b5ea7;
-  --gold: #c9a227;
-  --line: #e7dfd5;
+  --bg: #fdf7f0;
+  --surface: #fffdfa;
+  --ink: #3a2b3c;
+  --muted: #8b7a88;
+  --plum: #6b4b9a;
+  --plum-dark: #4a2f6e;
+  --iris: #9a7cc9;
+  --gold: #e2a86b;
+  --line: #efe3d7;
   --danger: #b23a48;
   --success: #2f7d5d;
   --radius: 18px;
-  --shadow: 0 18px 45px rgba(46, 26, 58, 0.12);
+  --shadow: 0 18px 45px rgba(107, 75, 154, 0.12);
   --font-body: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-display: Georgia, 'Times New Roman', serif;
 }
@@ -36,8 +37,8 @@ body {
   font-family: var(--font-body);
   color: var(--ink);
   background:
-    radial-gradient(circle at 8% 0%, rgba(123, 94, 167, 0.14), transparent 34%),
-    radial-gradient(circle at 92% 8%, rgba(201, 162, 39, 0.12), transparent 30%),
+    radial-gradient(circle at 8% 0%, rgba(154, 124, 201, 0.16), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgba(226, 168, 107, 0.2), transparent 30%),
     var(--bg);
   -webkit-font-smoothing: antialiased;
 }
@@ -120,11 +121,11 @@ textarea {
 .btn-primary {
   background: linear-gradient(135deg, var(--plum), var(--iris));
   color: #fff;
-  box-shadow: 0 12px 24px rgba(75, 46, 90, 0.25);
+  box-shadow: 0 12px 24px rgba(107, 75, 154, 0.25);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 16px 30px rgba(75, 46, 90, 0.3);
+  box-shadow: 0 16px 30px rgba(107, 75, 154, 0.3);
 }
 
 .btn-ghost {
@@ -293,12 +294,12 @@ textarea {
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, var(--plum), var(--iris));
   font-size: 30px;
 }
 
 .brand-large .brand-text small {
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--muted);
 }
 
 .site-header {
@@ -310,8 +311,8 @@ textarea {
   justify-content: space-between;
   gap: 24px;
   padding: 14px clamp(18px, 4vw, 48px);
-  border-bottom: 1px solid rgba(231, 223, 213, 0.85);
-  background: rgba(247, 243, 238, 0.84);
+  border-bottom: 1px solid rgba(239, 227, 215, 0.85);
+  background: rgba(253, 247, 240, 0.84);
   backdrop-filter: blur(14px);
 }
 
@@ -393,11 +394,12 @@ textarea {
   position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 22px;
   padding: 52px;
   overflow: hidden;
-  background: linear-gradient(150deg, #2e1a3a, #4b2e5a 55%, #6b4c8a);
-  color: #fff;
+  background: linear-gradient(150deg, #fff6ec, #fbe7db 55%, #eee0f7);
+  color: var(--ink);
 }
 
 .login-hero::after {
@@ -407,20 +409,22 @@ textarea {
   bottom: -120px;
   width: 420px;
   height: 420px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(107, 75, 154, 0.18);
   border-radius: 50%;
 }
 
 .login-hero h1 {
-  margin: 18px 0 0;
-  font-size: clamp(38px, 4.5vw, 58px);
+  margin: 0;
+  color: var(--plum);
+  font-size: clamp(56px, 8vw, 96px);
   line-height: 1.04;
+  letter-spacing: 0.02em;
 }
 
 .login-lead {
   max-width: 420px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
   font-size: 17px;
   line-height: 1.55;
 }
@@ -436,7 +440,7 @@ textarea {
 .login-features li {
   position: relative;
   padding-left: 28px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
   font-size: 15px;
 }
 
@@ -444,7 +448,7 @@ textarea {
   content: '✦';
   position: absolute;
   left: 0;
-  color: var(--gold);
+  color: var(--iris);
 }
 
 .login-art {
@@ -460,7 +464,8 @@ textarea {
   width: 70px;
   height: 70px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 24px rgba(107, 75, 154, 0.1);
   backdrop-filter: blur(6px);
 }
 
@@ -469,7 +474,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: #fbf8f4;
+  background: #fffaf4;
 }
 
 .login-card {
@@ -584,9 +589,9 @@ textarea {
   padding: clamp(28px, 4vw, 52px);
   overflow: hidden;
   border-radius: 30px;
-  background: linear-gradient(140deg, #2e1a3a 0%, #4b2e5a 55%, #7b5ea7 100%);
+  background: linear-gradient(140deg, #fff5ea 0%, #fbe7db 55%, #eee0f7 100%);
   box-shadow: var(--shadow);
-  color: #fff;
+  color: var(--ink);
 }
 
 .hero::before {
@@ -596,7 +601,7 @@ textarea {
   bottom: -120px;
   width: 380px;
   height: 380px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(107, 75, 154, 0.16);
   border-radius: 50%;
 }
 
@@ -606,7 +611,7 @@ textarea {
 }
 
 .hero .eyebrow {
-  color: var(--gold);
+  color: var(--iris);
 }
 
 .hero h1 {
@@ -618,7 +623,7 @@ textarea {
 .hero p {
   max-width: 560px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
   font-size: 17px;
   line-height: 1.6;
 }
@@ -631,14 +636,15 @@ textarea {
 }
 
 .hero .btn-primary {
-  background: var(--gold);
-  color: var(--plum-dark);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, var(--plum), var(--iris));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(107, 75, 154, 0.28);
 }
 
 .hero .btn-ghost {
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #fff;
+  border-color: rgba(107, 75, 154, 0.3);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--plum);
 }
 
 .hero-art {
@@ -650,14 +656,14 @@ textarea {
 
 .hero-emoji {
   font-size: clamp(90px, 12vw, 150px);
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 20px 30px rgba(107, 75, 154, 0.22));
 }
 
 .hero-ring {
   position: absolute;
   width: 240px;
   height: 240px;
-  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border: 1px dashed rgba(107, 75, 154, 0.32);
   border-radius: 50%;
   animation: spin 24s linear infinite;
 }
@@ -666,7 +672,7 @@ textarea {
   position: absolute;
   right: 0;
   bottom: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
   font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1098,6 +1104,96 @@ textarea {
   background: #fdfbf8;
 }
 
+/* Аналитические запросы в панели управления */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 18px;
+}
+
+.analytics-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.analytics-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.analytics-number {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: #f4eef8;
+  color: var(--iris);
+  font-weight: 700;
+}
+
+.analytics-card-head h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+.analytics-card-head p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.analytics-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.analytics-field {
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+
+.analytics-note {
+  margin: 0;
+  font-size: 13px;
+}
+
+.analytics-card > .btn {
+  align-self: flex-start;
+}
+
+.analytics-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.analytics-placeholder,
+.analytics-summary {
+  margin: 0;
+  font-size: 13px;
+}
+
+.analytics-result .data-table {
+  font-size: 13px;
+}
+
+.analytics-result .data-table th,
+.analytics-result .data-table td {
+  padding: 9px 12px;
+  white-space: normal;
+}
+
 .cart-panel {
   position: sticky;
   top: 90px;
@@ -1503,6 +1599,10 @@ textarea {
   }
 
   .order-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
     grid-template-columns: 1fr;
   }
 

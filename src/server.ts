@@ -6,6 +6,7 @@ import session from 'express-session';
 import './types';
 import { checkDatabaseConnection } from './config/db';
 import { errorHandler, notFoundHandler } from './middleware/errors';
+import { analyticsRouter } from './routes/analytics.routes';
 import { authRouter } from './routes/auth.routes';
 import { bookingsRouter } from './routes/bookings.routes';
 import { employeesRouter } from './routes/employees.routes';
@@ -46,6 +47,7 @@ app.use(
 );
 
 app.use('/api/auth', authRouter);
+app.use('/api', analyticsRouter);
 app.use('/api', menuRouter);
 app.use('/api', tablesRouter);
 app.use('/api', employeesRouter);
@@ -73,7 +75,7 @@ async function start(): Promise<void> {
   }
 
   app.listen(port, () => {
-    console.log(`Ресторан «Ирис» запущен: http://localhost:${port}/login.html`);
+    console.log(`Ресторан «Лотос» запущен: http://localhost:${port}/login.html`);
   });
 }
 

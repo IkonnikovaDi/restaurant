@@ -6,6 +6,7 @@ import {
   Order,
   Supply,
   Table,
+  TopDishAnalytics,
   User,
 } from './types.js';
 
@@ -181,6 +182,108 @@ export function getMyBookings(): Promise<{ bookings: Booking[] }> {
 
 export function getSupplies(): Promise<{ supplies: Supply[] }> {
   return request<{ supplies: Supply[] }>('/supplies');
+}
+
+// ---------------------------------------------------------------------------
+// Аналитические запросы
+// ---------------------------------------------------------------------------
+
+export function getAnalyticsDishes(
+  categoryId: number
+): Promise<{ dishes: Dish[] }> {
+  return request<{ dishes: Dish[] }>(
+    `/analytics/dishes${buildQuery({ categoryId })}`
+  );
+}
+
+export function getAnalyticsDishPrice(dishId: number): Promise<{ dish: Dish }> {
+  return request<{ dish: Dish }>(
+    `/analytics/dish-price${buildQuery({ dishId })}`
+  );
+}
+
+export function getAnalyticsBookingsToday(): Promise<{ bookings: Booking[] }> {
+  return request<{ bookings: Booking[] }>('/analytics/bookings/today');
+}
+
+export function getAnalyticsFreeTables(params: {
+  datetime?: string;
+  guests?: number;
+} = {}): Promise<{ datetime: string; guests: number | null; tables: Table[] }> {
+  return request<{ datetime: string; guests: number | null; tables: Table[] }>(
+    `/analytics/free-tables${buildQuery({
+      datetime: params.datetime,
+      guests: params.guests,
+    })}`
+  );
+}
+
+export function getAnalyticsWaiterOrders(params: {
+  employeeId: number;
+  date?: string;
+}): Promise<{ employee: Employee; date: string; orders: Order[] }> {
+  return request<{ employee: Employee; date: string; orders: Order[] }>(
+    `/analytics/waiter-orders${buildQuery({
+      employeeId: params.employeeId,
+      date: params.date,
+    })}`
+  );
+}
+
+export function getAnalyticsTopDishes(
+  month?: string
+): Promise<{ month: string; dishes: TopDishAnalytics[] }> {
+  return request<{ month: string; dishes: TopDishAnalytics[] }>(
+    `/analytics/top-dishes${buildQuery({ month })}`
+  );
+}
+
+export function getAnalyticsOrders(
+  date?: string
+): Promise<{ date: string; orders: Order[] }> {
+  return request<{ date: string; orders: Order[] }>(
+    `/analytics/orders${buildQuery({ date })}`
+  );
+}
+
+export function getAnalyticsSupplies(params: {
+  supplier: string;
+  from?: string;
+  to?: string;
+}): Promise<{
+  supplier: string;
+  from: string;
+  to: string;
+  supplies: Supply[];
+}> {
+  return request<{
+    supplier: string;
+    from: string;
+    to: string;
+    supplies: Supply[];
+  }>(
+    `/analytics/supplies${buildQuery({
+      supplier: params.supplier,
+      from: params.from,
+      to: params.to,
+    })}`
+  );
+}
+
+export function getAnalyticsSupplyAmount(
+  invoice: string
+): Promise<{ supply: Supply }> {
+  return request<{ supply: Supply }>(
+    `/analytics/supply-amount${buildQuery({ invoice })}`
+  );
+}
+
+export function getAnalyticsEmployees(
+  position?: string
+): Promise<{ position: string | null; employees: Employee[] }> {
+  return request<{ position: string | null; employees: Employee[] }>(
+    `/analytics/employees${buildQuery({ position })}`
+  );
 }
 
 export function updateBookingStatus(

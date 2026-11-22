@@ -14,9 +14,11 @@ import {
   formatPrice,
   hideFormError,
   initShell,
+  parseRussianDateTime,
   showFormError,
   showToast,
   statusClass,
+  toRussianDateTimeValue,
 } from './common.js';
 import { Booking, Category, Dish } from './types.js';
 
@@ -269,17 +271,19 @@ async function loadMyBookings(silent = false): Promise<void> {
 }
 
 async function refreshBookingTables(): Promise<void> {
-  const datetimeValue = bookingDateTime.value;
+  const datetimeValue = bookingDateTime.value.trim();
   const guestsCount = Number(bookingGuests.value);
 
   if (!datetimeValue || !Number.isInteger(guestsCount) || guestsCount < 1) {
     return;
   }
 
-  const date = new Date(datetimeValue);
-  if (Number.isNaN(date.getTime())) {
+  const parsedDateTime = parseRussianDateTime(datetimeValue);
+  if (!parsedDateTime) {
     return;
   }
+
+  const date = new Date(parsedDateTime);
 
   bookingTable.disabled = true;
   bookingTable.innerHTML = '<option value="">Загружаем свободные столы...</option>';
@@ -323,7 +327,7 @@ function openBookingDialog(): void {
   hideFormError(bookingError);
 
   if (!bookingDateTime.value) {
-    bookingDateTime.value = defaultBookingDateTime();
+    bookingDateTime.value = toRussianDateTimeValue(defaultBookingDateTime());
   }
   if (!bookingGuests.value) {
     bookingGuests.value = '2';
@@ -337,7 +341,7 @@ function openBookingDialog(): void {
 }
 
 function setupBookingDialog(): void {
-  bookingDateTime.value = defaultBookingDateTime();
+  bookingDateTime.value = toRussianDateTimeValue(defaultBookingDateTime());
   bookingGuests.value = '2';
 
   openBookingButton.addEventListener('click', openBookingDialog);
@@ -368,7 +372,7 @@ async function submitBooking(): Promise<void> {
   const phone = bookingPhone.value.trim();
   const guestsCount = Number(bookingGuests.value);
   const tableId = Number(bookingTable.value);
-  const date = new Date(bookingDateTime.value);
+  const parsedDateTime = parseRussianDateTime(bookingDateTime.value);
 
   if (!customerName || !phone) {
     showFormError(bookingError, 'Укажите ФИО и телефон');
@@ -382,11 +386,12 @@ async function submitBooking(): Promise<void> {
     showFormError(bookingError, 'Укажите количество гостей');
     return;
   }
-  if (Number.isNaN(date.getTime())) {
-    showFormError(bookingError, 'Укажите дату и время брони');
+  if (!parsedDateTime) {
+    showFormError(bookingError, 'Укажите дату и время в формате дд.мм.гггг чч:мм');
     return;
   }
 
+  const date = new Date(parsedDateTime);
   bookingSubmit.disabled = true;
   bookingSubmit.textContent = 'Бронируем...';
 
@@ -401,7 +406,7 @@ async function submitBooking(): Promise<void> {
 
     bookingDialog.close();
     bookingForm.reset();
-    bookingDateTime.value = defaultBookingDateTime();
+    bookingDateTime.value = toRussianDateTimeValue(defaultBookingDateTime());
     bookingGuests.value = '2';
 
     showToast(

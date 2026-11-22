@@ -94,3 +94,11 @@ export interface CartLine {
   dish: Dish;
   quantity: number;
 }
+
+export interface TopDishAnalytics {
+  dishId: number;
+  name: string;
+  categoryName: string;
+  quantitySold: number;
+  revenue: number;
+}

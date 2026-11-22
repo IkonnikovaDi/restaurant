@@ -32,38 +32,99 @@ export function formatPrice(value: number | string): string {
   return Number.isFinite(numeric) ? priceFormatter.format(numeric) : '—';
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat('ru-RU', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
-export function formatDateTime(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : dateTimeFormatter.format(date);
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
 }
 
-export function formatTime(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : timeFormatter.format(date);
+const RU_MONTHS = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+];
+
+/**
+ * Разбирает значение даты из API. Дата без времени (ГГГГ-ММ-ДД)
+ * трактуется как локальная, чтобы не сдвигать день из-за часового пояса.
+ */
+function parseDateValue(value: string): Date {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+
+  if (dateOnly) {
+    return new Date(
+      Number(dateOnly[1]),
+      Number(dateOnly[2]) - 1,
+      Number(dateOnly[3])
+    );
+  }
+
+  return new Date(value);
 }
 
+/**
+ * Дата в формате день.месяц.год, например 22.11.2026.
+ */
 export function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : dateFormatter.format(date);
+  const date = parseDateValue(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+
+  return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
+}
+
+/**
+ * Время в 24-часовом формате, например 15:50.
+ */
+export function formatTime(value: string): string {
+  const date = parseDateValue(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+/**
+ * Дата и время: 22.11.2026, 15:50.
+ */
+export function formatDateTime(value: string): string {
+  const date = parseDateValue(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+
+  return `${formatDate(value)}, ${formatTime(value)}`;
+}
+
+/**
+ * Месяц и год словами: ноябрь 2026. Принимает значение ГГГГ-ММ.
+ */
+export function formatMonth(value: string): string {
+  const match = /^(\d{4})-(\d{2})/.exec(value.trim());
+
+  if (!match) {
+    return value;
+  }
+
+  const monthIndex = Number(match[2]) - 1;
+
+  if (monthIndex < 0 || monthIndex > 11) {
+    return value;
+  }
+
+  return `${RU_MONTHS[monthIndex]} ${match[1]}`;
 }
 
 export function todayInputDate(): string {
@@ -81,6 +142,131 @@ export function toDateTimeLocalValue(date: Date): string {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+/**
+ * Преобразует ГГГГ-ММ-ДД в русское представление ДД.ММ.ГГГГ для полей ввода.
+ */
+export function toRussianDateValue(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value.trim());
+
+  if (!match) {
+    return value;
+  }
+
+  return `${match[3]}.${match[2]}.${match[1]}`;
+}
+
+/**
+ * Преобразует ГГГГ-ММ-ДДTЧЧ:ММ в ДД.ММ.ГГГГ ЧЧ:ММ для полей ввода.
+ */
+export function toRussianDateTimeValue(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(
+    value.trim()
+  );
+
+  if (!match) {
+    return value;
+  }
+
+  return `${match[3]}.${match[2]}.${match[1]} ${match[4]}:${match[5]}`;
+}
+
+/**
+ * Преобразует ГГГГ-ММ в ММ.ГГГГ для полей ввода.
+ */
+export function toRussianMonthValue(value: string): string {
+  const match = /^(\d{4})-(\d{2})/.exec(value.trim());
+
+  if (!match) {
+    return value;
+  }
+
+  return `${match[2]}.${match[1]}`;
+}
+
+/**
+ * Разбирает введённую дату ДД.ММ.ГГГГ и возвращает ГГГГ-ММ-ДД.
+ * Возвращает null, если дата некорректна.
+ */
+export function parseRussianDate(value: string): string | null {
+  const match = /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/.exec(value.trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
+/**
+ * Разбирает введённые дату и время ДД.ММ.ГГГГ ЧЧ:ММ и возвращает
+ * ГГГГ-ММ-ДДTЧЧ:ММ. Возвращает null, если значение некорректно.
+ */
+export function parseRussianDateTime(value: string): string | null {
+  const match =
+    /^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})[,\s]+(\d{1,2}):(\d{2})$/.exec(
+      value.trim()
+    );
+
+  if (!match) {
+    return null;
+  }
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const hours = Number(match[4]);
+  const minutes = Number(match[5]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  return `${year}-${pad2(month)}-${pad2(day)}T${pad2(hours)}:${pad2(minutes)}`;
+}
+
+/**
+ * Разбирает введённый месяц ММ.ГГГГ и возвращает ГГГГ-ММ.
+ * Возвращает null, если значение некорректно.
+ */
+export function parseRussianMonth(value: string): string | null {
+  const match = /^(\d{1,2})[.\/-](\d{4})$/.exec(value.trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const month = Number(match[1]);
+  const year = Number(match[2]);
+
+  if (month < 1 || month > 12) {
+    return null;
+  }
+
+  return `${year}-${pad2(month)}`;
 }
 
 export function defaultBookingDateTime(): string {
@@ -181,8 +367,8 @@ function renderHeader(user: User, active: 'menu' | 'admin'): void {
   header.innerHTML = `
     <header class="site-header">
       <a class="brand" href="${homeHref}">
-        <span class="brand-mark">И</span>
-        <span class="brand-text"><strong>Ирис</strong><small>японский ресторан</small></span>
+        <span class="brand-mark">Л</span>
+        <span class="brand-text"><strong>Лотос</strong><small>японский ресторан</small></span>
       </a>
       <nav class="main-nav">
         ${navLinks}

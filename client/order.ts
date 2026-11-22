@@ -1,3 +1,4 @@
+import { initAnalytics } from './analytics.js';
 import {
   ApiRequestError,
   createOrder,
@@ -22,6 +23,7 @@ import {
   formatTime,
   hideFormError,
   initShell,
+  parseRussianDate,
   showFormError,
   showToast,
   statusClass,
@@ -504,7 +506,25 @@ async function loadOrders(): Promise<void> {
 
 async function loadBookings(silent = false): Promise<void> {
   // Пустая дата означает «показать все брони».
-  const date = bookingsDate.value || undefined;
+  const rawDate = bookingsDate.value.trim();
+  let date: string | undefined;
+
+  if (rawDate) {
+    const parsedDate = parseRussianDate(rawDate);
+
+    if (!parsedDate) {
+      if (!silent) {
+        bookingsList.innerHTML = `
+          <div class="empty-state compact">
+            <p>Укажите дату в формате дд.мм.гггг</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    date = parsedDate;
+  }
 
   if (!silent) {
     bookingsList.innerHTML =
@@ -770,6 +790,9 @@ function switchTab(tab: string): void {
   if (tab === 'dishes') {
     void loadDishes();
   }
+  if (tab === 'analytics') {
+    void initAnalytics();
+  }
 }
 
 function setupTabs(): void {
@@ -915,6 +938,12 @@ function setupOrders(): void {
 function setupBookings(): void {
   refreshBookingsButton.addEventListener('click', () => void loadBookings());
   bookingsDate.addEventListener('change', () => void loadBookings());
+  bookingsDate.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void loadBookings();
+    }
+  });
   clearBookingsDateButton.addEventListener('click', () => {
     // Сброс фильтра: новая бронь на другую дату не должна теряться.
     bookingsDate.value = '';
@@ -987,6 +1016,11 @@ async function init(): Promise<void> {
   await Promise.all([loadMenu(), loadFreeTables(), loadWaiters()]);
   renderCart();
   applyPreselectedDish();
+
+  // Быстрый переход в аналитику: /order.html#analytics или /admin.html.
+  if (window.location.hash === '#analytics') {
+    switchTab('analytics');
+  }
 }
 
 void init();

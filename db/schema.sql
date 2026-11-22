@@ -1,10 +1,3 @@
--- ============================================================================
--- Ресторан «Ирис» — схема базы данных PostgreSQL
--- Предметная область: категории, блюда, сотрудники, столы, заказы,
--- состав заказа, поставки, бронирования и пользователи системы.
--- Скрипт можно применять повторно: существующие таблицы пересоздаются.
--- ============================================================================
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 DROP TABLE IF EXISTS order_items CASCADE;
@@ -17,9 +10,6 @@ DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS restaurant_tables CASCADE;
 DROP TABLE IF EXISTS employees CASCADE;
 
--- ---------------------------------------------------------------------------
--- Справочник категорий меню
--- ---------------------------------------------------------------------------
 CREATE TABLE categories (
     category_id SERIAL PRIMARY KEY,
     name        VARCHAR(100) NOT NULL UNIQUE,
@@ -30,9 +20,6 @@ CREATE TABLE categories (
 
 COMMENT ON TABLE categories IS 'Категории меню ресторана';
 
--- ---------------------------------------------------------------------------
--- Блюда
--- ---------------------------------------------------------------------------
 CREATE TABLE dishes (
     dish_id      SERIAL PRIMARY KEY,
     category_id  INTEGER NOT NULL,
@@ -49,9 +36,6 @@ CREATE TABLE dishes (
 
 COMMENT ON TABLE dishes IS 'Позиции меню';
 
--- ---------------------------------------------------------------------------
--- Сотрудники
--- ---------------------------------------------------------------------------
 CREATE TABLE employees (
     employee_id SERIAL PRIMARY KEY,
     last_name   VARCHAR(100) NOT NULL,
@@ -68,9 +52,6 @@ CREATE TABLE employees (
 
 COMMENT ON TABLE employees IS 'Работники ресторана';
 
--- ---------------------------------------------------------------------------
--- Столы в зале
--- ---------------------------------------------------------------------------
 CREATE TABLE restaurant_tables (
     table_id     SERIAL PRIMARY KEY,
     table_number INTEGER NOT NULL UNIQUE CHECK (table_number > 0),
@@ -87,9 +68,6 @@ CREATE TABLE restaurant_tables (
 
 COMMENT ON TABLE restaurant_tables IS 'Столы ресторанного зала';
 
--- ---------------------------------------------------------------------------
--- Заказы
--- ---------------------------------------------------------------------------
 CREATE TABLE orders (
     order_id    SERIAL PRIMARY KEY,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -110,9 +88,7 @@ CREATE TABLE orders (
 
 COMMENT ON TABLE orders IS 'Заказы посетителей';
 
--- ---------------------------------------------------------------------------
--- Состав заказа: ассоциативная сущность между заказами и блюдами
--- ---------------------------------------------------------------------------
+--Состав заказа: ассоциативная сущность между заказами и блюдами
 CREATE TABLE order_items (
     order_item_id SERIAL PRIMARY KEY,
     order_id      INTEGER NOT NULL,
@@ -130,9 +106,6 @@ CREATE TABLE order_items (
 
 COMMENT ON TABLE order_items IS 'Состав заказа, цена фиксируется на момент оформления';
 
--- ---------------------------------------------------------------------------
--- Поставки продуктов
--- ---------------------------------------------------------------------------
 CREATE TABLE supplies (
     supply_id      SERIAL PRIMARY KEY,
     supply_date    DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -147,9 +120,6 @@ CREATE TABLE supplies (
 
 COMMENT ON TABLE supplies IS 'Поставки продуктов от поставщиков';
 
--- ---------------------------------------------------------------------------
--- Бронирование столов
--- ---------------------------------------------------------------------------
 CREATE TABLE bookings (
     booking_id    SERIAL PRIMARY KEY,
     customer_name VARCHAR(150) NOT NULL,
@@ -173,9 +143,7 @@ CREATE TABLE bookings (
 
 COMMENT ON TABLE bookings IS 'Бронирования столов клиентами';
 
--- ---------------------------------------------------------------------------
--- Пользователи системы и роли
--- ---------------------------------------------------------------------------
+
 CREATE TABLE users (
     user_id       SERIAL PRIMARY KEY,
     login         VARCHAR(50) NOT NULL UNIQUE,
