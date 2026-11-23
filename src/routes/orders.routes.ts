@@ -84,7 +84,7 @@ function parseItems(raw: unknown): OrderItemInput[] {
 
 ordersRouter.post(
   '/orders',
-  requireRole('admin'),
+  requireRole('waiter', 'admin'),
   asyncHandler(async (req, res) => {
     const tableId = asPositiveInt(req.body?.tableId);
     const employeeId = asPositiveInt(req.body?.employeeId);
@@ -229,7 +229,7 @@ ordersRouter.post(
 
 ordersRouter.get(
   '/orders',
-  requireRole('admin'),
+  requireRole('admin', 'waiter'),
   asyncHandler(async (req, res) => {
     let status: OrderStatus | null = null;
     if (req.query.status !== undefined) {
@@ -289,7 +289,7 @@ ordersRouter.get(
 
 ordersRouter.get(
   '/orders/:id',
-  requireRole('admin'),
+  requireRole('admin', 'waiter'),
   asyncHandler(async (req, res) => {
     const orderId = asPositiveInt(req.params.id);
     if (!orderId) {
@@ -336,7 +336,7 @@ ordersRouter.get(
 
 ordersRouter.patch(
   '/orders/:id/status',
-  requireRole('admin'),
+  requireRole('admin', 'waiter'),
   asyncHandler(async (req, res) => {
     const orderId = asPositiveInt(req.params.id);
     if (!orderId) {

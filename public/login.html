@@ -27,11 +27,15 @@
         <div class="demo-roles">
           <button type="button" class="demo-role" data-demo-login="admin" data-demo-password="admin123">
             <span class="demo-icon">🛡️</span>
-            <span><strong>Администратор</strong><small>полный доступ</small></span>
+            <span><strong>Админ</strong><small>панель управления: заказы, брони, аналитика</small></span>
+          </button>
+          <button type="button" class="demo-role" data-demo-login="waiter" data-demo-password="waiter123">
+            <span class="demo-icon">🧑‍🍳</span>
+            <span><strong>Официант</strong><small>оформление заказа: стол, официант, меню и корзина</small></span>
           </button>
           <button type="button" class="demo-role" data-demo-login="guest" data-demo-password="guest123">
             <span class="demo-icon">🍣</span>
-            <span><strong>Гость</strong><small>меню и бронирование</small></span>
+            <span><strong>Гость</strong><small>меню и бронирование стола</small></span>
           </button>
         </div>
 
@@ -52,7 +56,10 @@
           <button id="login-submit" class="btn btn-primary btn-block" type="submit">Войти</button>
         </form>
 
-        <p class="demo-hint">Демо-доступ: <strong>admin / admin123</strong> или <strong>guest / guest123</strong></p>
+        <p class="demo-hint">
+          Демо-доступ: <strong>admin / admin123</strong>,
+          <strong>waiter / waiter123</strong> или <strong>guest / guest123</strong>
+        </p>
       </div>
     </section>
   </main>

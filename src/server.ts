@@ -56,7 +56,20 @@ app.use('/api', ordersRouter);
 app.use('/api', bookingsRouter);
 
 app.get('/', (req, res) => {
-  res.redirect(req.session.user ? '/index.html' : '/login.html');
+  const user = req.session.user;
+
+  if (!user) {
+    res.redirect('/login.html');
+    return;
+  }
+
+  const homeByRole: Record<string, string> = {
+    admin: '/admin.html',
+    waiter: '/order.html',
+    guest: '/index.html',
+  };
+
+  res.redirect(homeByRole[user.role] ?? '/login.html');
 });
 
 app.use('/api', notFoundHandler);

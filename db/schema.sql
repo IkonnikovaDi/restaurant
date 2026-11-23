@@ -155,7 +155,7 @@ CREATE TABLE users (
     CONSTRAINT fk_users_employee
         FOREIGN KEY (employee_id) REFERENCES employees (employee_id)
         ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT chk_users_role CHECK (role IN ('admin', 'guest'))
+    CONSTRAINT chk_users_role CHECK (role IN ('admin', 'waiter', 'guest'))
 );
 
 COMMENT ON TABLE users IS 'Учётные записи для входа в веб-приложение';

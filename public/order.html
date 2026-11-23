@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель управления — ресторан «Лотос»</title>
+  <title>Оформление заказа — ресторан «Лотос»</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body class="app-page">
@@ -12,24 +12,13 @@
   <main class="page">
     <section class="page-head">
       <div>
-        <span class="eyebrow">Администратор</span>
-        <h1>Панель управления</h1>
-        <p class="muted">Заказы, брони, сотрудники, столы, поставки и блюда ресторана.</p>
-      </div>
-
-      <div class="tabs" role="tablist" aria-label="Разделы панели">
-        <button type="button" class="tab is-active" data-tab="new" role="tab">Новый заказ</button>
-        <button type="button" class="tab" data-tab="orders" role="tab">Заказы</button>
-        <button type="button" class="tab" data-tab="bookings" role="tab">Брони</button>
-        <button type="button" class="tab" data-tab="employees" role="tab">Сотрудники</button>
-        <button type="button" class="tab" data-tab="tables" role="tab">Столы</button>
-        <button type="button" class="tab" data-tab="supplies" role="tab">Поставки</button>
-        <button type="button" class="tab" data-tab="dishes" role="tab">Блюда</button>
-        <button type="button" class="tab" data-tab="analytics" role="tab">Аналитика</button>
+        <span class="eyebrow">Официант</span>
+        <h1>Оформление заказа</h1>
+        <p class="muted">Выберите стол и официанта, добавьте блюда в корзину и создайте заказ.</p>
       </div>
     </section>
 
-    <section class="tab-panel is-active" data-panel="new">
+    <section class="tab-panel is-active">
       <div class="order-layout">
         <div class="panel">
           <div class="panel-head">
@@ -71,107 +60,6 @@
 
           <button id="submit-order" type="button" class="btn btn-primary btn-block">Создать заказ</button>
         </aside>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="orders">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Заказы</h2>
-          <div class="toolbar">
-            <select id="orders-status-filter" class="input">
-              <option value="">Все статусы</option>
-              <option value="новый">Новый</option>
-              <option value="готовится">Готовится</option>
-              <option value="подан">Подан</option>
-              <option value="оплачен">Оплачен</option>
-              <option value="закрыт">Закрыт</option>
-              <option value="отменён">Отменён</option>
-            </select>
-            <button id="refresh-orders" type="button" class="btn btn-ghost btn-small">Обновить</button>
-          </div>
-        </div>
-        <div id="orders-list" class="stack"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="bookings">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Брони</h2>
-          <div class="toolbar">
-            <input
-              id="bookings-date"
-              class="input"
-              type="text"
-              placeholder="дд.мм.гггг"
-              autocomplete="off"
-              aria-label="Дата брони"
-            >
-            <button id="clear-bookings-date" type="button" class="btn btn-ghost btn-small">Все брони</button>
-            <button id="refresh-bookings" type="button" class="btn btn-ghost btn-small">Обновить</button>
-          </div>
-        </div>
-        <p class="muted panel-hint">
-          Без выбранной даты показываются все брони. Укажите дату, чтобы отфильтровать по дню.
-          Список обновляется автоматически, новые брони гостей появляются без нажатия «Обновить».
-        </p>
-        <div id="bookings-list" class="stack"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="employees">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Сотрудники</h2>
-          <button id="refresh-employees" type="button" class="btn btn-ghost btn-small">Обновить</button>
-        </div>
-        <div id="employees-list"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="tables">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Столы</h2>
-          <button id="refresh-tables" type="button" class="btn btn-ghost btn-small">Обновить</button>
-        </div>
-        <div id="tables-list"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="supplies">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Поставки</h2>
-          <button id="refresh-supplies" type="button" class="btn btn-ghost btn-small">Обновить</button>
-        </div>
-        <div id="supplies-list"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="dishes">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Блюда</h2>
-          <button id="refresh-dishes" type="button" class="btn btn-ghost btn-small">Обновить</button>
-        </div>
-        <div id="dishes-list"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" data-panel="analytics">
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Аналитика</h2>
-            <p class="muted panel-hint">
-              10 готовых запросов к базе данных. Выберите параметры и нажмите
-              «Выполнить запрос» — результат появится в виде таблицы.
-            </p>
-          </div>
-        </div>
-        <div id="analytics-grid" class="analytics-grid"></div>
       </div>
     </section>
   </main>

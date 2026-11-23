@@ -13,6 +13,7 @@ import {
   formatDateTime,
   formatPrice,
   hideFormError,
+  homePathForRole,
   initShell,
   parseRussianDateTime,
   showFormError,
@@ -450,9 +451,9 @@ async function init(): Promise<void> {
     return;
   }
 
-  // Раздел меню предназначен гостю: у администратора блюда открываются в панели управления.
-  if (user.role === 'admin') {
-    window.location.href = '/order.html';
+  // Раздел меню предназначен гостю: сотрудники работают на своих страницах.
+  if (user.role !== 'guest') {
+    window.location.href = homePathForRole(user.role);
     return;
   }
 

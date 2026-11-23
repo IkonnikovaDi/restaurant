@@ -7,10 +7,24 @@ const loginInput = byId<HTMLInputElement>('login-input');
 const passwordInput = byId<HTMLInputElement>('password-input');
 const errorBox = byId<HTMLDivElement>('login-error');
 const submitButton = byId<HTMLButtonElement>('login-submit');
+const demoButtons = document.querySelectorAll<HTMLButtonElement>('[data-demo-login]');
 
-// Гость попадает в меню, администратор — в панель управления.
+// Каждая роль попадает только на свою стартовую страницу.
+const ROLE_HOME: Record<Role, string> = {
+  admin: '/admin.html',
+  waiter: '/order.html',
+  guest: '/index.html',
+};
+
 function homePath(role: Role): string {
-  return role === 'admin' ? '/order.html' : '/index.html';
+  return ROLE_HOME[role] ?? '/index.html';
+}
+
+function setFormDisabled(disabled: boolean): void {
+  submitButton.disabled = disabled;
+  demoButtons.forEach((button) => {
+    button.disabled = disabled;
+  });
 }
 
 async function redirectIfAuthenticated(): Promise<void> {
@@ -24,7 +38,7 @@ async function redirectIfAuthenticated(): Promise<void> {
 
 async function submitLogin(loginValue: string, password: string): Promise<void> {
   hideFormError(errorBox);
-  submitButton.disabled = true;
+  setFormDisabled(true);
   submitButton.textContent = 'Входим...';
 
   try {
@@ -37,7 +51,7 @@ async function submitLogin(loginValue: string, password: string): Promise<void> 
         : 'Не удалось войти. Попробуйте ещё раз.';
     showFormError(errorBox, message);
   } finally {
-    submitButton.disabled = false;
+    setFormDisabled(false);
     submitButton.textContent = 'Войти';
   }
 }
@@ -56,7 +70,7 @@ form.addEventListener('submit', (event) => {
   void submitLogin(loginValue, password);
 });
 
-document.querySelectorAll<HTMLButtonElement>('[data-demo-login]').forEach((button) => {
+demoButtons.forEach((button) => {
   button.addEventListener('click', () => {
     loginInput.value = button.dataset.demoLogin ?? '';
     passwordInput.value = button.dataset.demoPassword ?? '';

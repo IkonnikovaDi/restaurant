@@ -1,5 +1,5 @@
 import { ApiRequestError, getMe, logout } from './api.js';
-import { User } from './types.js';
+import { Role, User } from './types.js';
 
 export function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -347,22 +347,48 @@ export function hideFormError(element: HTMLElement): void {
   element.hidden = true;
 }
 
-function renderHeader(user: User, active: 'menu' | 'admin'): void {
+/**
+ * Стартовая страница для каждой роли.
+ */
+export function homePathForRole(role: Role): string {
+  const homes: Record<Role, string> = {
+    admin: '/admin.html',
+    waiter: '/order.html',
+    guest: '/index.html',
+  };
+
+  return homes[role] ?? '/index.html';
+}
+
+function renderHeader(
+  user: User,
+  active: 'menu' | 'order' | 'admin'
+): void {
   const header = document.getElementById('app-header');
 
   if (!header) {
     return;
   }
 
-  const roleLabel = user.role === 'admin' ? 'Администратор' : 'Гость';
-  const isAdmin = user.role === 'admin';
-  // Администратору раздел «Меню» не показываем: список блюд есть в панели управления.
-  const homeHref = isAdmin ? '/order.html' : '/index.html';
-  const navLinks = isAdmin
-    ? `<a href="/order.html" class="nav-link ${
-        active === 'admin' ? 'is-active' : ''
-      }">Панель управления</a>`
-    : `<a href="/index.html" class="nav-link ${active === 'menu' ? 'is-active' : ''}">Меню</a>`;
+  const roleLabels: Record<Role, string> = {
+    admin: 'Администратор',
+    waiter: 'Официант',
+    guest: 'Гость',
+  };
+  const roleLabel = roleLabels[user.role];
+  const homeHref = homePathForRole(user.role);
+  const navLinks =
+    user.role === 'guest'
+      ? `<a href="/index.html" class="nav-link ${
+          active === 'menu' ? 'is-active' : ''
+        }">Меню</a>`
+      : user.role === 'waiter'
+        ? `<a href="/order.html" class="nav-link ${
+            active === 'order' ? 'is-active' : ''
+          }">Оформление заказа</a>`
+        : `<a href="/admin.html" class="nav-link ${
+            active === 'admin' ? 'is-active' : ''
+          }">Панель управления</a>`;
 
   header.innerHTML = `
     <header class="site-header">
@@ -392,14 +418,14 @@ function renderHeader(user: User, active: 'menu' | 'admin'): void {
 }
 
 export async function initShell(
-  active: 'menu' | 'admin',
-  requireAdmin = false
+  active: 'menu' | 'order' | 'admin',
+  allowedRoles?: Role[]
 ): Promise<User | null> {
   try {
     const { user } = await getMe();
 
-    if (requireAdmin && user.role !== 'admin') {
-      window.location.href = '/index.html';
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+      window.location.href = homePathForRole(user.role);
       return null;
     }
 

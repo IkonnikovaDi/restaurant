@@ -7,7 +7,9 @@ export const employeesRouter = Router();
 
 employeesRouter.get(
   '/employees',
-  requireRole('admin'),
+  // Официанту список нужен для выбора обслуживавшего сотрудника
+  // в форме создания заказа.
+  requireRole('admin', 'waiter'),
   asyncHandler(async (req, res) => {
     const position = typeof req.query.position === 'string' ? req.query.position : null;
 

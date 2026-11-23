@@ -1,6 +1,6 @@
 import 'express-session';
 
-export type UserRole = 'admin' | 'guest';
+export type UserRole = 'admin' | 'waiter' | 'guest';
 
 export interface SessionUser {
   userId: number;
